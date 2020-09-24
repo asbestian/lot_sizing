@@ -1,0 +1,126 @@
+\documentclass{beamer}
+\beamertemplatenavigationsymbolsempty
+\usepackage[utf8]{inputenc} %needed for Umlaute
+\usepackage{amsmath, amsfonts, amssymb, amsthm, dsfont}
+\usepackage{csquotes}
+\usepackage{lmodern}
+\usepackage{dejavu}
+\usepackage{cleveref}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc} %8bit font encoding instead of 7bit
+
+
+\title{Integer programming formulations for the lot sizing problem.}
+
+\begin{document}
+
+\begin{frame}
+  \tableofcontents
+\end{frame}
+
+\section{Notation}
+\begin{frame}{Notation}
+    \begin{itemize}
+      \item a set $T = \{0,\ldots,m-1\}$ of $m$ machine types
+      \item a set $P = \{0,\ldots,n-1\}$ of $n$ time periods
+  \end{itemize}
+  \end{frame}
+
+\section{MIP formulation}
+\subsection{Variables}
+\begin{frame}{Production variables}
+    \begin{itemize}
+    \item $x^t_p \in \{0,1\}$ for $t \in T,~p \in P$ with $x^t_p = 1
+      \Leftrightarrow$ an item of machine type $t$ is produced at time
+      period $p$
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{State variables}
+    \begin{itemize}
+      \item $y^t_p \in \{0,1\}$ for $t \in T,~p \in P$ with $y^t_p = 1
+        \Leftrightarrow$ the machine is ready to produce an item of
+        machine type $t$ at time period $p$.
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{Stock variables}
+    \begin{itemize}
+      \item $s^t_p \in \mathbb{R}_{\geq0}$ for $t \in T,~p \in P \cup
+        \{-1\}$ with $s^t_p = \ell$ representing that $\ell$ items of
+        machine type $t$ are kept in stock at time period $p$
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{Transition variables}
+    \begin{itemize}
+      \item $u^{ij}_p \in \{0,1\}$ for $i \in T,~j \in T,~p \in P$
+        with $u^{ij}_p = 1$ $\Leftrightarrow$ the production changes
+        from machine type $i$ to machine type $j$ in time period $p$
+    \end{itemize}
+  \end{frame}
+
+  \subsection{Constraints}
+  \begin{frame}{Initial stock constraints}
+    \begin{itemize}
+    \item ensure an empty stock for each machine type before production begins
+    \item[]
+    \end{itemize}
+    \begin{equation}s^{t}_{-1} = 0~\text{for}~t \in T\label{stock-cons}\end{equation}
+  \end{frame}
+
+  \begin{frame}{Demand constraints}
+    \begin{itemize}
+      \item ensure that the demand for each machine type is met by
+        production and stock
+      \item let $d^t_p \in \{0,1\}$ be the given demand of machine
+        type $t$ at time period $p$
+      \item[]
+    \end{itemize}
+    \begin{equation}s^t_{p-1} + x^t_p = d^t_p + s^t_p~\text{for}~t \in T,~p \in P\label{demand-cons}\end{equation}
+  \end{frame}
+
+  \begin{frame}{State constraints}
+    \begin{itemize}
+      \item ensures that the machine is ready to produce machine type
+        $t$ at time period $p$ when producing machine type $t$ at $p$
+        \item[]
+    \end{itemize}
+    \begin{equation}x^t_p \leq y^t_p~\text{for}~t \in T,~p \in P\label{state-cons}\end{equation}
+  \end{frame}
+
+  \begin{frame}{Configuration constraints}
+    \begin{itemize}
+      \item ensure that the machine is in exactly one state at any
+        time
+      \item[]
+    \end{itemize}
+    \begin{equation}\sum\limits_{t \in T} y^t_p = 1~\text{for}~p \in P\label{config-cons}\end{equation}
+  \end{frame}
+
+  \begin{frame}{Transition constraints}
+    \begin{itemize}
+    \item ensure that the values of the transition variables are set
+      correctly 
+    \item[]
+    \end{itemize}
+    \begin{equation}u^{ij}_p \geq y^i_{p-1} + y^j_p -1~\text{for}~i \in T,~j \in T,~p \in P \setminus \{0\}\label{transition-cons}\end{equation}
+  \end{frame}
+
+  \subsection{Objective}
+  \begin{frame}{Entire formulation}
+    \begin{itemize}
+      \item let $h \in \mathbb{R}$ be the stocking cost representing
+        the cost for stocking an item (of any machine type) for one
+        time period
+      \item let $c_{ij} \in \mathbb{R}$ for $i \in T,~j \in T$ be the
+        transition cost representing the cost for changing the machine
+        configuration from machine type $i$ to machine type $j$
+      \item[]
+    \end{itemize}
+    \begin{align*}\min \sum\limits_{t \in T} \sum\limits_{p \in P} &h s^t_p + \sum\limits_{i \in T} \sum\limits_{j \in T} \sum\limits_{p \in P \setminus \{0\}} c_{ij} u^{ij}_p\\
+      \textbf{s.t.}~~&\eqref{stock-cons} - \eqref{transition-cons}.
+    \end{align*}
+  \end{frame}
+    
+\end{document}
