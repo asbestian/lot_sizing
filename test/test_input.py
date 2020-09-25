@@ -11,8 +11,8 @@ class InputTest(unittest.TestCase):
         with patch('lot_sizing.input.open') as mock_open:
             mock_open.return_value.__enter__ = mock_open
             mock_open.return_value.__iter__ = Mock(
-                return_value=iter(["6",  # number time slots
-                                   "3",  # number machine types
+                return_value=iter(["6",  # number of time periods
+                                   "3",  # number of machine types
                                    "1 0 0 0 1 0",  # demand machine type 0
                                    "0 1 0 0 1 0",  # demand machine type 1
                                    "0 0 0 0 0 1",  # demand machine type 2

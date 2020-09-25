@@ -25,7 +25,7 @@ def create_schedule(model: MipModel):
         if len(produced_type) == 1:
             schedule[time_period] = produced_type[0]
         elif len(produced_type) > 1:
-            raise RuntimeError(f'Several machine types {produced_type} produced at time period {time_period}')
+            raise RuntimeError(f'Several machine types {produced_type} produced in time period {time_period}')
     return schedule
 
 

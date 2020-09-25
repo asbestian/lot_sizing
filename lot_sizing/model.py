@@ -23,7 +23,7 @@ class MipModel:
         """Create production variables.
 
         A production variable $x^t_p$ is a binary variable which is one if and only if an item of machine type $t$ is
-        produced at time period $p$.
+        produced in time period $p$.
 
         :param num_types: the number of considered machines types
         :param num_time_periods: the number of considered time periods
@@ -41,7 +41,7 @@ class MipModel:
         """Create state variables.
 
         A state variable $y^t_p$ is a binary variable which is one if and only if the machine is configured
-        to produce an item of machine type $t$ at time period $p$.
+        to produce an item of machine type $t$ in time period $p$.
 
         :param num_types: the number of considered machines types
         :param num_time_periods: the number of considered time periods
@@ -59,7 +59,7 @@ class MipModel:
         """Create stock variables.
 
          A stock variable $s^t_p$ is a non-negative real variable which represents the number of items of machine type
-         $t$ on stock at the end of time period $p$.
+         $t$ on stock in time period $p$.
 
         :param num_types: the number of considered machines types
         :param num_time_periods: the number of considered time periods
@@ -77,7 +77,7 @@ class MipModel:
         """Create transition variables.
 
         A transition variable $u^ij_p$ is a binary variable which is one if and only if the machine's state
-        changed from being configured for machine type $i$ at time period $p-1$ to machine type $j$ at time period $p$.
+        changed from being configured for machine type $i$ in time period $p-1$ to machine type $j$ in time period $p$.
         """
         transition_vars = dict()
         for type_i, type_j, time_period in product(range(num_types), range(num_types), range(1, num_time_periods)):
@@ -97,8 +97,8 @@ class MipModel:
         """Add demand constraints.
 
         A demand constraint wrt machine type $t$ and time period $p$ ensures that the stock of machine type $t$ in
-        time period $p-1$ plus the value of the production variable $x^t_p$ equals the demand of $t$ at time period
-        $p$ plus the stock at time period $p$.
+        time period $p-1$ plus the value of the production variable $x^t_p$ equals the demand of $t$ in time period
+        $p$ plus the stock in time period $p$.
         """
         for (machine_type, time_period) in product(range(self.prob_input.num_types),
                                                    range(self.prob_input.num_time_periods)):
@@ -111,7 +111,7 @@ class MipModel:
         """Add state constraints.
 
         A state constraint wrt machine type $t$ and time period $p$ ensures that the machine is ready to produce machine
-        type $t$ at time period $p$ when producing machine type $t$ at $p$.
+        type $t$ in time period $p$ when producing machine type $t$ in time period $p$.
         """
         for (machine_type, time_period) in product(range(self.prob_input.num_types),
                                                    range(self.prob_input.num_time_periods)):

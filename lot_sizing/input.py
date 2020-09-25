@@ -82,7 +82,7 @@ class Input:
         """
         if time_period >= self.num_time_periods:
             raise InputError(
-                f'Given time slot {time_period} expected to be smaller than overall number {self.num_time_periods}.')
+                f'Given time period {time_period} expected to be smaller than overall number {self.num_time_periods}.')
         if machine_type >= self.num_types:
             raise InputError(
                 f'Given machine type {machine_type} expected to be smaller than overall number {self.num_types}.')
@@ -96,7 +96,7 @@ class Input:
         """
         if time_period >= self.num_time_periods:
             raise InputError(
-                f'Given time slot {time_period} expected to be smaller than overall number {self.num_time_periods}.')
+                f'Given time period {time_period} expected to be smaller than overall number {self.num_time_periods}.')
         if machine_type >= self.num_types:
             raise InputError(
                 f'Given machine type {machine_type} expected to be smaller than overall number {self.num_types}.')
