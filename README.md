@@ -8,6 +8,18 @@ in the `doc` folder.
 
 Further information is also available at [OptimizationHub](https://opthub.uniud.it/problem/lsp).
 
+Installation
+------------
+Source code requires `python3.6` (or later versions).
+
+In `root` directory: `python3 -m pip install -r requirements.txt`
+
+Execution
+-------------------------
+In `root` directory: `python3 main.py -f input_file.txt`
+
+Run `python3 main.py -h` to see command line options.
+
 Unit tests
 ---------
 In `root` directory: `python3 -m unittest discover test -v`
@@ -17,12 +29,6 @@ Documentation
 In `doc` directory: `make html` 
 
 The html documentation can then be found in `doc/build/html`.
-
-Execution
-----------
-In `root` directory: `python3 main.py -f input_file.txt`
-
-Run `python3 main.py -h` to see command line options.
 
 Authors
 -------
