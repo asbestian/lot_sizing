@@ -17,6 +17,8 @@ class MipModel:
         self.state_vars = None
         self.stock_vars = None
         self.transition_vars = None
+        self.pred_state_vars = None
+        self.succ_state_vars = None
 
     @staticmethod
     def _add_production_variables(num_types: int, num_time_periods: int, solver: pywraplp):
@@ -40,7 +42,7 @@ class MipModel:
     def _add_state_variables(num_types: int, num_time_periods: int, solver: pywraplp):
         """Create state variables.
 
-        A state variable $y^t_p$ is a binary variable which is one if and only if the machine is configured
+        A state variable $y^t_p$ is a binary variable which is one if and only if the machine is ready
         to produce an item of machine type $t$ in time period $p$.
 
         :param num_types: the number of considered machines types
@@ -53,6 +55,30 @@ class MipModel:
         for (machine_type, time_period) in product(range(num_types), range(num_time_periods)):
             state_vars[(machine_type, time_period)] = solver.BoolVar(name=f'y_{machine_type}_{time_period}')
         return state_vars
+
+    @staticmethod
+    def _add_predecessor_state_variables(num_types: int, num_time_periods: int, solver: pywraplp):
+        """Create predecessor state variables.
+
+        A predecessor state variable $v^t_p$ is a binary variable which is one if and only if the machine is ready
+        to produce an item of machine type $t$ in time period $p$ but not in time period $p-1$.
+        """
+        pred_state_vars = dict()
+        for (machine_type, time_period) in product(range(num_types), range(1, num_time_periods)):
+            pred_state_vars[(machine_type, time_period)] = solver.BoolVar(name=f'v_{machine_type}_{time_period}')
+        return pred_state_vars
+
+    @staticmethod
+    def _add_successor_state_variables(num_types: int, num_time_periods: int, solver: pywraplp):
+        """Create successor state variables.
+
+        A successor state variable $w^t_p$ is a binary variable which is one if and only if the machine is ready to
+        produce an item of machine type $t$ in time period $p$ but not in time period $p+1$.
+        """
+        succ_state_vars = dict()
+        for (machine_type, time_period) in product(range(num_types), range(num_time_periods-1)):
+            succ_state_vars[(machine_type, time_period)] = solver.BoolVar(name=f'w_{machine_type}_{time_period}')
+        return succ_state_vars
 
     @staticmethod
     def _add_stock_variables(num_types: int, num_time_periods: int, solver: pywraplp):
@@ -183,3 +209,28 @@ class MipModel:
         ins._add_transition_constraints()
         ins._add_objective()
         return ins
+
+    @classmethod
+    def build_extended_mip(cls, prob_input: Input, solver):
+        """Build extended mip formulation for the given lot sizing instance via the given solver.
+
+        :param prob_input: the input problem instance to consider
+        :param solver: the solver instance to use
+        """
+        ins = cls(prob_input, solver)
+        ins.production_vars = ins._add_production_variables(prob_input.num_types, prob_input.num_time_periods, solver)
+        ins.state_vars = ins._add_state_variables(prob_input.num_types, prob_input.num_time_periods, solver)
+        ins.stock_vars = ins._add_stock_variables(prob_input.num_types, prob_input.num_time_periods, solver)
+        ins.transition_vars = ins._add_transition_variables(prob_input.num_types, prob_input.num_time_periods, solver)
+        ins.pred_state_vars = ins._add_predecessor_state_variables(prob_input.num_types, prob_input.num_time_periods,
+                                                                   solver)
+        ins.succ_state_vars = ins._add_successor_state_variables(prob_input.num_types, prob_input.num_time_periods,
+                                                                 solver)
+        ins._add_initial_stock_constraints()
+        ins._add_demand_constraints()
+        ins._add_state_constraints()
+        ins._add_configuration_constraints()
+        ins._add_transition_constraints()
+        ins._add_objective()
+        return ins
+
