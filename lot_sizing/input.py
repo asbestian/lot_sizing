@@ -2,7 +2,7 @@
 
 from itertools import product
 
-from typing import List, Iterator
+from typing import List
 
 
 class InputError(Exception):
@@ -20,32 +20,6 @@ class Input:
         self.inventory_cost = None
         self.transition_cost = dict()
 
-    def __read_times(self, line_iter: Iterator):
-        """Reads number of time periods."""
-        self.num_time_periods = int(next(line_iter))
-
-    def __read_types(self, line_iter: Iterator):
-        """Reads number of machine types."""
-        self.num_types = int(next(line_iter))
-
-    def __read_demand(self, line_iter: Iterator):
-        """Reads demand for each machine type."""
-        for i in range(self.num_types):
-            line = next(line_iter)
-            self.demand[i] = [int(j) for j in line.split()]
-            assert (len(self.demand[i]) == self.num_time_periods)
-
-    def __read_inventory_cost(self, line_iter: Iterator):
-        """Reads inventory cost."""
-        self.inventory_cost = int(next(line_iter))
-
-    def __read_transition_cost(self, line_iter: Iterator):
-        """Reads transition cost for each machine type."""
-        for i in range(self.num_types):
-            line = next(line_iter)
-            self.transition_cost[i] = [int(j) for j in line.split()]
-            assert (len(self.transition_cost[i]) == self.num_types)
-
     def __str__(self):
         """Return string representation."""
         return f'{self.num_time_periods}\n{self.num_types}\n' + "\n".join(
@@ -61,13 +35,15 @@ class Input:
         ins = cls()
         try:
             with open(file, mode='r', encoding='utf8') as file_input:
-                lines = (line.strip() for line in file_input if line.strip() != '')
-                ins.__read_times(lines)
-                ins.__read_types(lines)
-                ins.__read_demand(lines)
+                times, types, *rest = (line.strip() for line in file_input if line.strip() != '')
+                ins.num_time_periods = int(times)
+                ins.num_types = int(types)
+                for i, demand in enumerate(rest[:ins.num_types]):
+                    ins.demand[i] = [int(j) for j in demand.split()]
                 ins.overall_demand = sum([sum(ins.demand[i]) for i in range(ins.num_types)])
-                ins.__read_inventory_cost(lines)
-                ins.__read_transition_cost(lines)
+                ins.inventory_cost = int(rest[ins.num_types])
+                for i, cost in enumerate(rest[-ins.num_types:]):
+                    ins.transition_cost[i] = [int(j) for j in cost.split()]
 
         except FileNotFoundError:
             raise InputError(f'File {file} not found.')
@@ -140,15 +116,14 @@ class Input:
 
     def compute_transition_cost(self, schedule: List[int]) -> int:
         """Returns the transition cost of the given schedule."""
-        last_state = -1
+        prev_state = -1
         transition_cost = 0
         for state in schedule:
             if state == -1:
                 continue
-            if state != last_state:
-                if last_state != -1:
-                    transition_cost += self.transition_cost[last_state][state]
-                last_state = state
+            if state != prev_state and prev_state != -1:
+                transition_cost += self.transition_cost[prev_state][state]
+            prev_state = state
         return transition_cost
 
     def compute_inventory_cost(self, schedule: List[int]) -> int:
@@ -158,7 +133,6 @@ class Input:
             demand = [index for index, item in enumerate(self.demand[machine_type]) if item == 1]
             production = [index for index, item in enumerate(schedule) if item == machine_type]
             demand += [self.num_time_periods - 1] * (len(production) - len(demand))
-            assert len(demand) == len(production)
             difference = [d - p for d, p in zip(demand, production)]
             inventory_cost += sum(difference) * self.inventory_cost
         return inventory_cost
